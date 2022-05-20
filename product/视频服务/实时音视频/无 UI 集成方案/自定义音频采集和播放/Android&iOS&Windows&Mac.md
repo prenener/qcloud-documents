@@ -1,21 +1,21 @@
-本文档主要介绍如何使用 TRTC SDK 实现自定义视频采集和渲染，分为：视频采集、视频渲染两个部分。
+本文档主要介绍如何使用 TRTC SDK 实现自定义音频采集和获取，分为：音频采集、音频获取两个部分。
 
-## 自定义视频采集
+## 自定义音频采集
 
-TRTC SDK 的自定义视频采集功能的开启分为两步，即：开启功能、发送视频帧给 SDK，具体 API 使用步骤见下文，同时我们也提供有对应平台的的API-Example：
+TRTC SDK 的自定义音频采集功能的开启分为两步，即：开启功能、发送音频帧给 SDK，具体 API 使用步骤见下文，同时我们也提供有对应平台的的API-Example：
 
-- [Android]()：
+- [Android](https://github.com/LiteAVSDK/TRTC_Android/blob/main/TRTC-API-Example/Advanced/LocalVideoShare/src/main/java/com/tencent/trtc/mediashare/LocalVideoShareActivity.java)：
 - [iOS]()
-- [Windows](https://github.com/LiteAVSDK/TRTC_Windows/blob/main/TRTC-API-Example-C++/TRTC-API-Example-Qt/src/TestCustomCapture/test_custom_capture.cpp) 
+- [Windows]() 
 
-### 开启自定义视频采集功能
+### 开启自定义音频采集功能
 
-首先，您需要调用 TRTCCloud 的 `enableCustomVideoCapture` 接口开启  TRTC SDK 自定义视频采集的功能，开启后会跳过 TRTC SDK 自己的摄像头采集和图像处理逻辑，仅保留编码和传输能力，示例代码如下：
+首先，您需要调用 TRTCCloud 的 `enableCustomAudioCapture` 接口开启  TRTC SDK 自定义音频采集的功能，示例代码如下：
 
 <dx-codeblock>
 ::: Android  Java
 TRTCCloud mTRTCCloud = TRTCCloud.shareInstance();
-mTRTCCloud.TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, true);
+mTRTCCloud.enableCustomAudioCapture(true);
 :::
 ::: iOS&Mac  ObjC
 :::
@@ -24,26 +24,18 @@ mTRTCCloud.TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, true);
 </dx-codeblock>
 
 
-### 发送自定义视频帧
+### 发送自定义音频帧
 
-然后您就可以使用 TRTCCloud 的 `sendCustomVideoData` 接口向 TRTC SDK 发送您自己的视频数据，示例代码如下：
-
->? 为了避免不必要的性能损失，对于输入 TRTC SDK 的视频数据，在不同平台上有不同的格式要求，更多信息，详见我们的 API 文档：[简体中文 ](https://liteav.sdk.qcloud.com/doc/api/zh-cn/index.html)、[English](https://liteav.sdk.qcloud.com/doc/api/en/md_introduction_trtc_en_TRTCSDK_Download.html)；
-
+然后您就可以使用 TRTCCloud 的 `sendCustomVideoData` 接口向 TRTC SDK 填充您自己的声音数据，示例代码如下：
 
 <dx-codeblock>
 ::: Android  Java
-// Android 平台有 Buffer 和 Texture 两种方案，此处以 Texture 方案为例，推荐！
-TRTCCloudDef.TRTCVideoFrame videoFrame = new TRTCCloudDef.TRTCVideoFrame();
-videoFrame.texture = new TRTCCloudDef.TRTCTexture();
-videoFrame.texture.textureId = textureId;
-videoFrame.texture.eglContext14 = eglContext;
-videoFrame.width = width;
-videoFrame.height = height;
-videoFrame.timestamp = timestamp;
-videoFrame.pixelFormat = TRTCCloudDef.TRTC_VIDEO_PIXEL_FORMAT_Texture_2D;
-videoFrame.bufferType = TRTCCloudDef.TRTC_VIDEO_BUFFER_TYPE_TEXTURE;
-mTRTCCloud.sendCustomVideoData(TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, videoFrame);
+TRTCCloudDef.TRTCAudioFrame trtcAudioFrame = new TRTCCloudDef.TRTCAudioFrame();
+trtcAudioFrame.data = data;
+trtcAudioFrame.sampleRate = sampleRate;
+trtcAudioFrame.channel = channel;
+trtcAudioFrame.timestamp = timestamp;
+mTRTCCloud.sendCustomAudioData(trtcAudioFrame);
 :::
 ::: iOS&Mac  ObjC
 
@@ -54,28 +46,49 @@ mTRTCCloud.sendCustomVideoData(TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, videoFra
 :::
 </dx-codeblock>
 
+>! 使用 `sendCustomAudioData` 有可能会导致回声抵消（AEC）的功能失效。
 
 
 
 
-## 自定义视频渲染
+## 获取音频原数据
 
-自定义渲染主要分为：本地预览画面的渲染、和远端用户画面的渲染，基本原理：设置本地/远端的自定义渲染回调，然后 TRTC SDK 会通过回调函数`onRenderVideoFrame`中传递出来对应的视频帧（即TRTCVideoFrame），然后就开发者可以根据收到的视频帧进行自定义渲染了，这个流程需要具备一定的OpenGL 基础，我们也提供有对应平台的的API-Example：
+声音模块是一个高复杂度的模块，SDK 需要严格控制声音设备的采集和播放逻辑。在某些场景下，当您需要获取远程用户的音频数据或者需要获取本地麦克风采集到的音频数据时，可以通过 TRTCCloud 对应的不同平台的接口，我们也提供有对应平台的的API-Example：
 
-- [Android]()：
+- [Android](https://github.com/LiteAVSDK/TRTC_Android/blob/main/TRTC-API-Example/Advanced/LocalVideoShare/src/main/java/com/tencent/trtc/mediashare/LocalVideoShareActivity.java)：
 - [iOS]()
-- [Windows](https://github.com/LiteAVSDK/TRTC_Windows/blob/main/TRTC-API-Example-C++/TRTC-API-Example-Qt/src/TestCustomCapture/test_custom_capture.cpp) 
+- [Windows]() 
 
 
-### 设置本地预览画面的渲染回调
+### 设置音频回调函数
 <dx-codeblock>
 ::: Android  Java
-mTRTCCloud.setLocalVideoRenderListener(TRTCCloudDef.TRTC_VIDEO_PIXEL_FORMAT_Texture_2D, TRTCCloudDef.TRTC_VIDEO_BUFFER_TYPE_TEXTURE, new TRTCCloudListener.TRTCVideoRenderListener() {
-    @Override
-    public void onRenderVideoFrame(String suserId int streamType, TRTCCloudDef.TRTCVideoFrame frame) {
-		// 详见TRTC-API-Example 中自定义渲染的工具类：com.tencent.trtc.mediashare.helper.CustomFrameRender  
-    }
-});
+mTRTCCloud.setAudioFrameListener(new TRTCCloudListener.TRTCAudioFrameListener() {
+        @Override
+        public void onCapturedRawAudioFrame(TRTCCloudDef.TRTCAudioFrame trtcAudioFrame) {
+
+        }
+    
+        @Override
+        public void onLocalProcessedAudioFrame(TRTCCloudDef.TRTCAudioFrame trtcAudioFrame) {
+    
+        }
+    
+        @Override
+        public void onRemoteUserAudioFrame(TRTCCloudDef.TRTCAudioFrame trtcAudioFrame, String s) {
+    
+        }
+    
+        @Override
+        public void onMixedPlayAudioFrame(TRTCCloudDef.TRTCAudioFrame trtcAudioFrame) {
+    
+        }
+    
+        @Override
+        public void onMixedAllAudioFrame(TRTCCloudDef.TRTCAudioFrame trtcAudioFrame) {
+            // 详见TRTC-API-Example 中自定义渲染的工具类：com.tencent.trtc.mediashare.helper.CustomFrameRender  
+        }
+    }); 
 :::
 ::: iOS&Mac
 
@@ -85,38 +98,6 @@ mTRTCCloud.setLocalVideoRenderListener(TRTCCloudDef.TRTC_VIDEO_PIXEL_FORMAT_Text
 :::
 </dx-codeblock>
 
-
-### 设置远端用户画面的渲染回调
-<dx-codeblock>
-::: Android  Java
-mTRTCCloud.setRemoteVideoRenderListener(userId, TRTCCloudDef.TRTC_VIDEO_PIXEL_FORMAT_I420, TRTCCloudDef.TRTC_VIDEO_BUFFER_TYPE_BYTE_ARRAY, new TRTCCloudListener.TRTCVideoRenderListener() {
-    @Override
-    public void onRenderVideoFrame(String userId, int streamType, TRTCCloudDef.TRTCVideoFrame frame) {
-		 // 详见TRTC-API-Example 中自定义渲染的工具类：com.tencent.trtc.mediashare.helper.CustomFrameRender  
-    }
-});
-:::
-::: iOS&Mac
-
-:::
-::: Windows
-```
-void TestCustomRender::onRenderVideoFrame(
-    const char* userId,
-    liteav::TRTCVideoStreamType streamType,
-    liteav::TRTCVideoFrame* frame) {
-  if (gl_yuv_widget_ == nullptr) {
-    return;
-  }
-
-  if (streamType == liteav::TRTCVideoStreamType::TRTCVideoStreamTypeBig) {
-    // 调整渲染窗口
-    emit renderViewSize(frame->width, frame->height);
-    // 绘制视频帧
-    gl_yuv_widget_->slotShowYuv(reinterpret_cast<uchar*>(frame->data),
-                                frame->width, frame->height);
-  }
-}
-```
-:::
-</dx-codeblock>
+>!
+- 不要在上述回调函数中做任何耗时操作，建议直接拷贝，并通过另一线程进行处理，否则会导致声音断断续续或者回声抵消（AEC）失效的问题。
+- 上述回调函数中回调出来的数据都只允许读取和拷贝，不能修改，否则会导致各种不确定的后果。

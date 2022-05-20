@@ -4,7 +4,7 @@
 
 TRTC SDK 的自定义视频采集功能的开启分为两步，即：开启功能、发送视频帧给 SDK，具体 API 使用步骤见下文，同时我们也提供有对应平台的的API-Example：
 
-- [Android]()：
+- [Android](https://github.com/LiteAVSDK/TRTC_Android/blob/main/TRTC-API-Example/Advanced/LocalVideoShare/src/main/java/com/tencent/trtc/mediashare/LocalVideoShareActivity.java)
 - [iOS]()
 - [Windows](https://github.com/LiteAVSDK/TRTC_Windows/blob/main/TRTC-API-Example-C++/TRTC-API-Example-Qt/src/TestCustomCapture/test_custom_capture.cpp) 
 
@@ -15,7 +15,7 @@ TRTC SDK 的自定义视频采集功能的开启分为两步，即：开启功�
 <dx-codeblock>
 ::: Android  Java
 TRTCCloud mTRTCCloud = TRTCCloud.shareInstance();
-mTRTCCloud.TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, true);
+mTRTCCloud.enableCustomVideoCapture(TRTCCloudDef.TRTC_VIDEO_STREAM_TYPE_BIG, true);
 :::
 ::: iOS&Mac  ObjC
 :::
